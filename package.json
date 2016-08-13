@@ -1,0 +1,23 @@
+{
+  "name": "simple-bookstore",
+  "version": "1.0.0",
+  "description": "A simple project to work with sql databases.",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.14.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rachel-ftw/Simple-SQL-Bookstore.git"
+  },
+  "author": "Rachel Ralston, Jared Gripe",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rachel-ftw/Simple-SQL-Bookstore/issues"
+  },
+  "homepage": "https://github.com/rachel-ftw/Simple-SQL-Bookstore#readme"
+}
