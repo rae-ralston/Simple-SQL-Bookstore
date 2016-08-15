@@ -1,0 +1,19 @@
+extends ../layout.pug
+
+block title
+  title All of our Books!
+block content
+  h1 Woah books
+
+
+  table
+    thead
+      tr
+        th ID
+        th Title
+    tbody
+      for book in books
+        tr
+          td= book.id
+          td
+            a(href="/books/"+book.id)= book.title
