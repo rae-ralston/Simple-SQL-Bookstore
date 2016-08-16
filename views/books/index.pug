@@ -3,11 +3,12 @@ extends ../layout.pug
 block title
   title All of our Books!
 block content
-  h1 Woah books
+  a(href="/")='The Singing Siren Bookstore'
+  p Science Fiction and Fantasy Books
 
 
   table
-    thead
+    thead Our Books
       tr
         th ID
         th Title
@@ -17,3 +18,4 @@ block content
           td= book.id
           td
             a(href="/books/"+book.id)= book.title
+            //how do we make these in alphabetical order?

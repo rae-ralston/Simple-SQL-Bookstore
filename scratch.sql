@@ -1,5 +1,7 @@
 -- CREATE TABLES
 
+--psql bookstore < scratch.sql
+
 DROP TABLE IF EXISTS book;
 CREATE TABLE book
 (
@@ -48,7 +50,8 @@ VALUES
   ('The Golden Compass'),
   ('The Subtle Knife'),
   ('Dune'),
-  ('A Scanner Darkly');
+  ('A Scanner Darkly'),
+  ('Good Omens');
 
 INSERT INTO 
   genre (genre)
@@ -56,6 +59,7 @@ VALUES
   ('Young Adult'),
   ('Sci Fi'),
   ('Romance'),
+  ('Comedy'),
   ('Fantasy');
 
 INSERT INTO 
@@ -66,7 +70,9 @@ VALUES
   ('Jacqueline', 'Carey'),
   ('Philip', 'Pullman'),
   ('Orson Scott', 'Card'),
-  ('Philip', 'Dick');
+  ('Philip', 'Dick'),
+  ('Terry', 'Prachett'),
+  ('Neil', 'Gaiman');
 
 
 -- CONNECT DATA TO EACH OTHER THROUGH JOIN TABLES
@@ -82,6 +88,23 @@ FROM book
 CROSS JOIN genre
 WHERE book.title='White Fang'
 AND genre.genre='Young Adult';
+
+---Good Omens is a Fantasy Book
+INSERT INTO book_genre
+SELECT book.id, genre.id
+FROM book
+CROSS JOIN genre
+WHERE book.title='Good Omens'
+AND genre.genre='Fantasy';
+
+
+---Good Omens is a Comedy Book
+INSERT INTO book_genre
+SELECT book.id, genre.id
+FROM book
+CROSS JOIN genre
+WHERE book.title='Good Omens'
+AND genre.genre='Comedy';
 
 ---golden compass is a YA book
 INSERT INTO book_genre
@@ -158,6 +181,24 @@ WHERE book.title='Kushiel''s Dart'
 AND author.first_name='Jacqueline'
 AND author.last_name='Carey';
 
+--Good Omens was written by Terry Prachett
+INSERT INTO book_author
+SELECT book.id, author.id
+FROM book
+CROSS JOIN author
+WHERE book.title='Good Omens'
+AND author.first_name='Terry'
+AND author.last_name='Prachett';
+
+--Good Omens was written by Terry Prachett
+INSERT INTO book_author
+SELECT book.id, author.id
+FROM book
+CROSS JOIN author
+WHERE book.title='Good Omens'
+AND author.first_name='Neil'
+AND author.last_name='Gaiman';
+
 
 --white fang was written by jack london
 INSERT INTO book_author
@@ -205,7 +246,7 @@ WHERE book.title='Dune'
 AND author.first_name='Frank'
 AND author.last_name='Herbert';
 
---the golden compass was written by philip pullman
+--a scanner darkley was written by philip k dick
 INSERT INTO book_author
 SELECT book.id, author.id
 FROM book
@@ -218,7 +259,7 @@ AND author.last_name='Dick';
 
 ----------------------SEARCHING LIKE CRAZY
 
---select all books, from books, join into book_genres
+--all books with Genra YA
 SELECT book.* 
 FROM book
 JOIN book_genre
@@ -228,24 +269,14 @@ ON book_genre.genre_id=genre.id
 WHERE genre.genre='Young Adult';
 
 
-SELECT genre.title
-FROM genres
+--all white fang's genre
+SELECT genre.genre
+FROM genre
 JOIN book_genre
 ON book_genre.genre_id=genre.id
 JOIN book
 ON book.id=book_genre.book_id
 WHERE book.title='White Fang';
-
-
----------------------------------
-
---- get all authors
-SELECT *
-FROM author
-
---- get all books
-SELECT *
-FROM book
 
 -- give me all the genres for book "X"
 SELECT DISTINCT(genre.*)
@@ -256,26 +287,44 @@ JOIN book
 ON book_genre.book_id=book.id
 WHERE book.title='Kushiel''s Dart';
 
--- give me all the books in the genre "X"
+-- get book.title by author_id
 SELECT DISTINCT(book.*)
-FROM book
-INNER JOIN book_genre
-ON book.id=book_genre.book_id
-INNER JOIN genre
-ON book_genre.genre_id=genre.id
-WHERE genre.genre='Young Adult';
+FROM book 
+JOIN book_author
+ON book.id=book_author.book_id
+JOIN author
+ON book_author.author_id=author.id
+WHERE author.first_name='Philip'
+AND author.last_name='Pullman';
 
--- give me all the books authored by "X"
-SELECT author.*
+-- get author name by book title
+SELECT DISTINCT(author.*)
 FROM author 
 JOIN book_author
 ON author.id=book_author.author_id
 JOIN book
 ON book_author.book_id=book.id
-WHERE author.first_name='Philip'
-AND author.last_name='Pullman';
+WHERE book.title='Good Omens';
 
--- give me the one author book "X"
--- give me all the books where title is like "X"
+-- get book.title by pattern: First letter of last name (p)
+-- https://www.postgresql.org/docs/8.3/static/functions-matching.html
+SELECT DISTINCT(book.*)
+FROM book 
+JOIN book_author
+ON book.id=book_author.book_id
+JOIN author
+ON book_author.author_id=author.id
+WHERE author.last_name LIKE 'P%';
+
+-- get book.title by pattern: Part of a last name? Pull for pullman
+SELECT DISTINCT(book.*)
+FROM book 
+JOIN book_author
+ON book.id=book_author.book_id
+JOIN author
+ON book_author.author_id=author.id
+WHERE author.last_name SIMILAR TO 'Pull_';
+
+
 -- give me all the books with at least one of N genres
 

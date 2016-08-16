@@ -6,9 +6,12 @@ const getAllBooks = function(){
   return db.any("select * from book")  
 }
 
+//note the distince function creation for each kind of action.
+
 const getBookById = function(bookId){
   return db.one("select * from book where book.id=$1", [bookId])
 }
+
 const getGenresByBookId = function(bookId){
   const sql = `
     SELECT
@@ -22,7 +25,7 @@ const getGenresByBookId = function(bookId){
     WHERE
       book_genre.book_id=$1;
   `
-  return db.one(sql, [bookId])
+  return db.any(sql, [bookId])
 }
 
 const getAuthorsByBookId = function(bookId){
@@ -34,11 +37,11 @@ const getAuthorsByBookId = function(bookId){
     JOIN
       book_author
     ON
-      book_author.genre_id=genre.id
+      book_author.author_id=author.id
     WHERE
       book_author.book_id=$1;
   `
-  return db.one(sql, [bookId])
+  return db.any(sql, [bookId])
 }
 
 const getBookAndAuthorsAndGenresByBookId = function(bookId){
@@ -47,8 +50,12 @@ const getBookAndAuthorsAndGenresByBookId = function(bookId){
     getGenresByBookId(bookId),
     getAuthorsByBookId(bookId),
   ]).then(function(data){
-    console.log('DATA???', data)
-  })
+    var book = data[0]
+    book.authors=data[2]
+    book.genres=data[1]
+    console.log(book)
+    return book
+  }) 
 }
 
 module.exports = {
@@ -56,4 +63,5 @@ module.exports = {
   db: db,
   getAllBooks: getAllBooks,
   getBookById: getBookById,
+  getBookAndAuthorsAndGenresByBookId:getBookAndAuthorsAndGenresByBookId,
 }
