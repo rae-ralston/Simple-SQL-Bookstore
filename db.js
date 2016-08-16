@@ -3,29 +3,29 @@ var connectionString = `postgres://${process.env.USER}@localhost:5432/bookstore`
 var db = pgp(connectionString)
 
 const getAllBooks = function(){
-  return db.any("select * from book")  
+  return db.any("select * from books")  
 }
 
 const getAllGenres = function(){
-  return db.any("select * from genre")  
+  return db.any("select * from genres")  
 }
 
 //note the distince function creation for each kind of action.
 
 const getBookById = function(bookId){
-  return db.one("select * from book where book.id=$1", [bookId])
+  return db.one("select * from books where books.id=$1", [bookId])
 }
 
 const getGenresByBookId = function(bookId){
   const sql = `
     SELECT
-      DISTINCT(genre.*)
+      DISTINCT(genres.*)
     FROM 
-      genre
+      genres
     JOIN
       book_genre
     ON
-      book_genre.genre_id=genre.id
+      book_genre.genre_id=genres.id
     WHERE
       book_genre.book_id=$1;
   `
@@ -36,21 +36,23 @@ const getGenresByBookId = function(bookId){
 // query strig syntaxt so form submits data i correct format
 // get ojbect with string, pass into
 // const searchForBook()
-// where book title is like this
-// or author.name is like this
 
 
+const searchForBook= searchTerm => {
+  // where book title is like this
+  // or author.name is like this
+}
 
 const getAuthorsByBookId = function(bookId){
     const sql = `
     SELECT
-      DISTINCT(author.*)
+      DISTINCT(authors.*)
     FROM 
-      author
+      authors
     JOIN
       book_author
     ON
-      book_author.author_id=author.id
+      book_author.author_id=authors.id
     WHERE
       book_author.book_id=$1;
   `
@@ -61,13 +63,13 @@ const createAuthor = function(attributes){
   console.log(attributes)
   const sql = `
     INSERT INTO
-      author (first_name, last_name)
+      authors (author)
     VALUES
-      ($1, $2)
+      ($1)
     RETURNING
       id
   `
-  return db.one(sql, [attributes.first_name, attributes.last_name])
+  return db.one(sql, [attributes.author])
 }
 
 const associateAuthorsWithBook = function(authorIds, bookId){
@@ -98,10 +100,9 @@ const associateGenresWithBook = function(genreIds, bookId){
 
 
 const createBook = function(attributes){
-  console.log(attributes)
   const sql = `
     INSERT INTO
-      book (title)
+      books (title)
     VALUES
       ($1)
     RETURNING
@@ -128,17 +129,6 @@ const createBook = function(attributes){
     })
 }
 
-const authorLastName = function(first_name, last_name){
-  const sql = `
-    INSERT INTO
-      author (first_name, last_name)
-    VALUES
-      ($1, $2);
-      `
-  return db.one(sql, [first_name, last_name])
-}
-
-
 
 const getBookAndAuthorsAndGenresByBookId = function(bookId){
   return Promise.all([
@@ -162,7 +152,6 @@ module.exports = {
   getAllBooks: getAllBooks,
   getBookById: getBookById,
   createBook: createBook,
-  authorLastName: authorLastName,
   getAllGenres: getAllGenres,
   createAuthor:createAuthor,
   getBookAndAuthorsAndGenresByBookId:getBookAndAuthorsAndGenresByBookId,
