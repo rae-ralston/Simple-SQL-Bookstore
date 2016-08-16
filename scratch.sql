@@ -325,6 +325,9 @@ JOIN author
 ON book_author.author_id=author.id
 WHERE author.last_name SIMILAR TO 'Pull_';
 
+-- get book.title by pattern: Part of a last name? Pull for pullman
+SELECT *
+FROM book 
 
 -- give me all the books with at least one of N genres
 

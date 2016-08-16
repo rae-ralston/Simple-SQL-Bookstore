@@ -44,6 +44,16 @@ const getAuthorsByBookId = function(bookId){
   return db.any(sql, [bookId])
 }
 
+const insertBook = function(title){
+    const sql = `
+    INSERT INTO
+      book (title)
+    VALUES
+      ($1);
+      `
+  return db.one(sql, [title])
+}
+
 const getBookAndAuthorsAndGenresByBookId = function(bookId){
   return Promise.all([
     getBookById(bookId),
@@ -58,10 +68,26 @@ const getBookAndAuthorsAndGenresByBookId = function(bookId){
   }) 
 }
 
+const insertBookAndAuthors = function(authorFirst, authorLast, BookTitle){
+  return Promise.all([
+    getBookById(bookId),
+    getGenresByBookId(bookId),
+    getAuthorsByBookId(bookId),
+  ]).then(function(data){
+    var book = data[0]
+    book.authors=data[2]
+    book.genres=data[1]
+    console.log(book)
+    return book
+  }) 
+}
+
+
 module.exports = {
   pgp: pgp,
   db: db,
   getAllBooks: getAllBooks,
   getBookById: getBookById,
+  insertBook: insertBook,
   getBookAndAuthorsAndGenresByBookId:getBookAndAuthorsAndGenresByBookId,
 }

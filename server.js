@@ -1,9 +1,13 @@
 var express = require('express');
 var database = require('./db');
+var bodyParser = require("body-parser");
 
 var app = express();
 
 app.set('view engine', 'pug');
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.get('/', (req,res) => {
   res.render('index')
@@ -32,6 +36,17 @@ app.get('/books/:book_id', (req,res) => {
       throw error
     })
 });
+
+app.post('/insert', (req,res) =>{
+  const { title } = req.body  
+  database.insertBook(title)
+    .then(function(data){
+      console.log(data)
+    })
+    .catch(function(error){
+      throw error
+    })
+})
 
 
 var port = Number( process.env.PORT || 5000 );
