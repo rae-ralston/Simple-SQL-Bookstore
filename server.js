@@ -6,18 +6,30 @@ var app = express();
 
 app.set('view engine', 'pug');
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.get('/', (req,res) => {
   res.render('index')
-});
+})
 
 app.get('/books', (req,res) => {
   database.getAllBooks()
     .then(function(books){
       res.render('books/index', {
         books: books
+      })
+    })
+    .catch(function(error){
+      throw error
+    })
+});
+
+app.get('/books/new', (req,res) => {
+  database.getAllGenres()
+    .then(function(genres){
+      res.render('books/new', {
+        genres: genres
       })
     })
     .catch(function(error){
@@ -37,16 +49,21 @@ app.get('/books/:book_id', (req,res) => {
     })
 });
 
-app.post('/insert', (req,res) =>{
-  const { title } = req.body  
-  database.insertBook(title)
-    .then(function(data){
-      console.log(data)
-    })
+app.post('/books', (req,res) =>{
+  database.createBook(req.body.book)
     .catch(function(error){
-      throw error
+      renderError(res, error)
     })
+    .then(function(bookId){   
+      res.redirect('/books/'+bookId)
+    })
+
 })
+
+const renderError = function(res, error){
+  res.status(500).render('error', {error: error})
+  throw error
+}
 
 
 var port = Number( process.env.PORT || 5000 );

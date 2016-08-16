@@ -6,6 +6,10 @@ const getAllBooks = function(){
   return db.any("select * from book")  
 }
 
+const getAllGenres = function(){
+  return db.any("select * from genre")  
+}
+
 //note the distince function creation for each kind of action.
 
 const getBookById = function(bookId){
@@ -28,6 +32,15 @@ const getGenresByBookId = function(bookId){
   return db.any(sql, [bookId])
 }
 
+// make a from
+// query strig syntaxt so form submits data i correct format
+// get ojbect with string, pass into
+// const searchForBook()
+// where book title is like this
+// or author.name is like this
+
+
+
 const getAuthorsByBookId = function(bookId){
     const sql = `
     SELECT
@@ -44,15 +57,88 @@ const getAuthorsByBookId = function(bookId){
   return db.any(sql, [bookId])
 }
 
-const insertBook = function(title){
+const createAuthor = function(attributes){
+  console.log(attributes)
+  const sql = `
+    INSERT INTO
+      author (first_name, last_name)
+    VALUES
+      ($1, $2)
+    RETURNING
+      id
+  `
+  return db.one(sql, [attributes.first_name, attributes.last_name])
+}
+
+const associateAuthorsWithBook = function(authorIds, bookId){
+  let queries = authorIds.map(authorId => {
     const sql = `
+      INSERT INTO
+        book_author (book_id, author_id)
+      VALUES
+        ($1, $2)
+    `
+    return db.none(sql, [bookId, authorId])
+  })
+  return Promise.all(queries)
+}
+
+const associateGenresWithBook = function(genreIds, bookId){
+  let queries = genreIds.map(genreId => { 
+    let sql = `
+      INSERT INTO
+        book_genre (book_id, genre_id)
+      VALUES
+        ($1, $2)
+    `
+    return db.none(sql, [bookId, genreId])
+  })
+  return Promise.all(queries)
+}
+
+
+const createBook = function(attributes){
+  console.log(attributes)
+  const sql = `
     INSERT INTO
       book (title)
     VALUES
-      ($1);
-      `
-  return db.one(sql, [title])
+      ($1)
+    RETURNING
+      id
+  `
+  var queries = [
+    db.one(sql, [attributes.title]) // create the book
+  ]
+  // also create the authors
+  attributes.authors.forEach(author =>
+    queries.push(createAuthor(author))
+  )
+
+  return Promise.all(queries)
+    .then(authorIds => {
+      authorIds = authorIds.map(x => x.id)
+      const bookId = authorIds.shift()
+      return Promise.all([
+        associateAuthorsWithBook(authorIds, bookId),
+        associateGenresWithBook(attributes.genres, bookId),
+      ]).then(function(){
+        return bookId;
+      })
+    })
 }
+
+const authorLastName = function(first_name, last_name){
+  const sql = `
+    INSERT INTO
+      author (first_name, last_name)
+    VALUES
+      ($1, $2);
+      `
+  return db.one(sql, [first_name, last_name])
+}
+
+
 
 const getBookAndAuthorsAndGenresByBookId = function(bookId){
   return Promise.all([
@@ -68,19 +154,6 @@ const getBookAndAuthorsAndGenresByBookId = function(bookId){
   }) 
 }
 
-const insertBookAndAuthors = function(authorFirst, authorLast, BookTitle){
-  return Promise.all([
-    getBookById(bookId),
-    getGenresByBookId(bookId),
-    getAuthorsByBookId(bookId),
-  ]).then(function(data){
-    var book = data[0]
-    book.authors=data[2]
-    book.genres=data[1]
-    console.log(book)
-    return book
-  }) 
-}
 
 
 module.exports = {
@@ -88,6 +161,9 @@ module.exports = {
   db: db,
   getAllBooks: getAllBooks,
   getBookById: getBookById,
-  insertBook: insertBook,
+  createBook: createBook,
+  authorLastName: authorLastName,
+  getAllGenres: getAllGenres,
+  createAuthor:createAuthor,
   getBookAndAuthorsAndGenresByBookId:getBookAndAuthorsAndGenresByBookId,
 }

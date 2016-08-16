@@ -1,11 +1,19 @@
 doctype html
 html
   head
+    style
+      include ../css/main.css
     block title
       title The Singing Siren Bookstore
   body
-    h1
-      a(href="/") The Singing Siren Bookstore
+    h1 The Singing Siren Bookstore
     p Science Fiction and Fantasy Books
+    ul
+      li
+        a(href="/") Home
+      li
+        a(href="/books") Our Books
+      li
+        a(href="/") Add a Book
     block content
       
