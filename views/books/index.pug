@@ -3,15 +3,16 @@ extends ../layout.pug
 block title
   title All of our Books!
 block content
-  table
-    thead Our Books
-      tr
-        th ID
-        th Title
-    tbody
-      for book in books
+  div
+    table
+      thead Our Books
         tr
-          td= book.id
-          td
-            a(href="/books/"+book.id)= book.title
-            //how do we make these in alphabetical order?
+          th ID
+          th Title
+      tbody
+        for book in books
+          tr
+            td= book.id
+            td
+              a(href="/books/"+book.id)= book.title
+              //how do we make these in alphabetical order?

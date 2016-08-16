@@ -3,11 +3,12 @@ extends ../layout.pug
 block title
   title=book.title
 block content
-  a(href="/books")='back to library'
-  h1=book.title
-  ol
-    for author in book.authors
-      li= author.first_name + ' ' + author.last_name
-  ol
-    for genre in book.genres
-      li=genre.genre
+  div
+    a(href="/books")='back to library'
+    h1=book.title
+    ol
+      for author in book.authors
+        li= author.first_name + ' ' + author.last_name
+    ol
+      for genre in book.genres
+        li=genre.genre

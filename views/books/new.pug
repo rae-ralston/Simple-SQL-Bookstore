@@ -5,20 +5,17 @@ block title
   
 block content
   div
-    form(action="/books", method="post")
-      div
-        input(type="title", name="book[title]", placeholder="Book Title")
-      div
-        input(type="text", name="book[authors][0][first_name]", placeholder="Author First Name")
-      div
-        input(type="text", name="book[authors][0][last_name]", placeholder="Author Last Name")
-      div
-        input(type="text", name="book[authors][1][first_name]", placeholder="Author First Name")
-      div
-        input(type="text", name="book[authors][1][last_name]", placeholder="Author Last Name")
-      div
-        select(name="book[genres]" multiple)
-          for genre in genres 
-            option(value=genre.id)=genre.genre
-      div
-        input(type="submit", value="Submit a book!" )
+    div
+      form(action="/books", method="post")
+        div
+          input(type="title", name="book[title]", placeholder="Book Title")
+        div
+          input(type="text", name="book[authors][0][author]", placeholder="First Author Name")
+        div
+          input(type="text", name="book[authors][1][author]", placeholder="Second Author Name")
+        div
+          select(name="book[genres]" multiple)
+            for genre in genres 
+              option(value=genre.id)=genre.genre
+        div
+          input(type="submit", value="Submit a book!" )
