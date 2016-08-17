@@ -49,6 +49,10 @@ const getAuthorsByBookId = function(bookId){
 
 ///////////////////////////// SEARCH
 const searchForBooks = function(options){
+
+
+
+
   console.log(options)
   const variables = []
   let sql = `
