@@ -18,6 +18,8 @@ app.get('/books', (req,res) => {
     .then(function(books){
       res.render('books/index', {
         books: books
+        // genres: genres,
+        // authors: authors
       })
     })
     .catch(function(error){

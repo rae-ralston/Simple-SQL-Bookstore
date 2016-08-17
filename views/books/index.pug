@@ -3,17 +3,18 @@ extends ../layout.pug
 block title
   title All of our Books!
 block content
-  div
-    h3 search for existing books
+  div.spaceGiver
+    h3 Search Books
     form(action="/books", method="get")
       div
         input(type="text", name="search_query", placeholder="Search by Title or Author")
       div
         input(type="submit", value="find")
 
-  div
+  div.spaceGiver
+    h3 Available Books
     table
-      thead All books currently available
+      thead 
         tr
           th ID
           th Title
@@ -24,3 +25,7 @@ block content
             td
               a(href="/books/"+book.id)= book.title
               //how do we make these in alphabetical order?
+        //- for author in authors
+        //-   tr
+        //-     td= author.id
+        //-     td= author.author

@@ -19,11 +19,3 @@ block content
             option(value=genre.id)=genre.genre
       div
         input(type="submit", value="Submit a book!" )
-
-  div
-    h3 search for existing books
-    form(action="/books/search", method="get")
-      div
-        input(type="text", name="book[authors][1][author]", placeholder="Search by Title or Author")
-      div
-        input(type="submit", value="find")
