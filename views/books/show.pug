@@ -8,7 +8,7 @@ block content
     h1=book.title
     ol
       for author in book.authors
-        li= author.first_name + ' ' + author.last_name
+        li= author.author
     ol
       for genre in book.genres
         li=genre.genre

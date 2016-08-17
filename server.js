@@ -14,7 +14,7 @@ app.get('/', (req,res) => {
 })
 
 app.get('/books', (req,res) => {
-  database.getAllBooks()
+  database.searchForBooks(req.query)
     .then(function(books){
       res.render('books/index', {
         books: books
@@ -50,6 +50,7 @@ app.get('/books/:book_id', (req,res) => {
 });
 
 app.post('/books', (req,res) =>{
+  console.log(req.body)
   database.createBook(req.body.book)
     .catch(function(error){
       renderError(res, error)

@@ -10,8 +10,6 @@ const getAllGenres = function(){
   return db.any("select * from genres")  
 }
 
-//note the distince function creation for each kind of action.
-
 const getBookById = function(bookId){
   return db.one("select * from books where books.id=$1", [bookId])
 }
@@ -32,17 +30,6 @@ const getGenresByBookId = function(bookId){
   return db.any(sql, [bookId])
 }
 
-// make a from
-// query strig syntaxt so form submits data i correct format
-// get ojbect with string, pass into
-// const searchForBook()
-
-
-const searchForBook= searchTerm => {
-  // where book title is like this
-  // or author.name is like this
-}
-
 const getAuthorsByBookId = function(bookId){
     const sql = `
     SELECT
@@ -59,6 +46,79 @@ const getAuthorsByBookId = function(bookId){
   return db.any(sql, [bookId])
 }
 
+
+///////////////////////////// SEARCH
+const searchForBooks = function(options){
+  console.log(options)
+  const variables = []
+  let sql = `
+    SELECT 
+      DISTINCT(books.*)
+    FROM
+      books
+  `
+  if (options.search_query){
+    let search_query = options.search_query
+      .toLowerCase()
+      .replace(/^ */, '%')
+      .replace(/ *$/, '%')
+      .replace(/ +/g, '%')
+    
+    variables.push(search_query)
+    sql += `
+        WHERE
+      LOWER(books.title) LIKE $${variables.length}
+    `
+  }
+  console.log('----->', sql, variables)
+  return db.any(sql, variables)
+}
+
+
+const searchForBook = searchTerm => {
+  const sql = `
+    SELECT
+      DISTINCT(books.*)
+    FROM 
+      books
+    JOIN 
+      book_author
+    ON 
+      authors.id=book_author.author_id
+    JOIN 
+      books
+    ON 
+      book_author.book_id=books.id
+    WHERE 
+      authors.author LIKE '$1%';
+  `
+  return db.any(sql, [searchTerm])
+}
+
+const searchForAuthor = searchTerm => {
+  const sql = `
+    SELECT
+      DISTINCT(authors.*)
+    FROM 
+      authors
+    JOIN 
+      book_author
+    ON 
+      books.id=book_author.book_id
+    JOIN 
+      authors
+    ON 
+      book_author.author_id=authors.id
+    WHERE 
+      authors.author LIKE '$1%';
+  `
+  return db.any(sql, [searchTerm])
+}
+
+
+
+///////////////////////////// CREATE AND ASSOCIATE
+
 const createAuthor = function(attributes){
   console.log(attributes)
   const sql = `
@@ -73,6 +133,7 @@ const createAuthor = function(attributes){
 }
 
 const associateAuthorsWithBook = function(authorIds, bookId){
+  authorIds = Array.isArray(authorIds) ? authorIds : [authorIds]
   let queries = authorIds.map(authorId => {
     const sql = `
       INSERT INTO
@@ -86,6 +147,7 @@ const associateAuthorsWithBook = function(authorIds, bookId){
 }
 
 const associateGenresWithBook = function(genreIds, bookId){
+  genreIds = Array.isArray(genreIds) ? genreIds : [genreIds]
   let queries = genreIds.map(genreId => { 
     let sql = `
       INSERT INTO
@@ -97,7 +159,6 @@ const associateGenresWithBook = function(genreIds, bookId){
   })
   return Promise.all(queries)
 }
-
 
 const createBook = function(attributes){
   const sql = `
@@ -129,7 +190,6 @@ const createBook = function(attributes){
     })
 }
 
-
 const getBookAndAuthorsAndGenresByBookId = function(bookId){
   return Promise.all([
     getBookById(bookId),
@@ -144,8 +204,6 @@ const getBookAndAuthorsAndGenresByBookId = function(bookId){
   }) 
 }
 
-
-
 module.exports = {
   pgp: pgp,
   db: db,
@@ -154,5 +212,6 @@ module.exports = {
   createBook: createBook,
   getAllGenres: getAllGenres,
   createAuthor:createAuthor,
+  searchForBooks:searchForBooks,
   getBookAndAuthorsAndGenresByBookId:getBookAndAuthorsAndGenresByBookId,
 }

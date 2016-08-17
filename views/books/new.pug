@@ -5,17 +5,25 @@ block title
   
 block content
   div
-    div
-      form(action="/books", method="post")
-        div
-          input(type="title", name="book[title]", placeholder="Book Title")
-        div
-          input(type="text", name="book[authors][0][author]", placeholder="First Author Name")
-        div
-          input(type="text", name="book[authors][1][author]", placeholder="Second Author Name")
-        div
-          select(name="book[genres]" multiple)
-            for genre in genres 
-              option(value=genre.id)=genre.genre
-        div
-          input(type="submit", value="Submit a book!" )
+    h3 add a book to the system
+    form(action="/books", method="post")
+      div
+        input(type="title", name="book[title]", placeholder="Book Title")
+      div
+        input(type="text", name="book[authors][0][author]", placeholder="First Author Name")
+      div
+        input(type="text", name="book[authors][1][author]", placeholder="Second Author Name")
+      div
+        select(name="book[genres]" multiple)
+          for genre in genres 
+            option(value=genre.id)=genre.genre
+      div
+        input(type="submit", value="Submit a book!" )
+
+  div
+    h3 search for existing books
+    form(action="/books/search", method="get")
+      div
+        input(type="text", name="book[authors][1][author]", placeholder="Search by Title or Author")
+      div
+        input(type="submit", value="find")

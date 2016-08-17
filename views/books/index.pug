@@ -4,8 +4,16 @@ block title
   title All of our Books!
 block content
   div
+    h3 search for existing books
+    form(action="/books", method="get")
+      div
+        input(type="text", name="search_query", placeholder="Search by Title or Author")
+      div
+        input(type="submit", value="find")
+
+  div
     table
-      thead Our Books
+      thead All books currently available
         tr
           th ID
           th Title

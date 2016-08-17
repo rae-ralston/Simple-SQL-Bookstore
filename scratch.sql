@@ -312,11 +312,8 @@ JOIN book_author
 ON books.id=book_author.book_id
 JOIN authors
 ON book_author.author_id=authors.id
-WHERE authors.author LIKE 'Pull%';
+WHERE authors.author LIKE 'Nei%';
 
--- give me all the books!
-SELECT *
-FROM books
 
 -- give me all the books with at least one of N genres
 
