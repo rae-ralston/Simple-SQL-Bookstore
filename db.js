@@ -15,45 +15,42 @@ const getBookById = function(bookId){
 }
 
 const getGenresByBookId = function(bookId){
-  const sql = `
+  const sql =  `
     SELECT
-      DISTINCT(genres.*)
+      genres.*,
+      book_genre.book_id
     FROM 
       genres
     JOIN
       book_genre
     ON
-      book_genre.genre_id=genres.id
+      genres.id = book_genre.genre_id
     WHERE
-      book_genre.book_id=$1;
-  `
-  return db.any(sql, [bookId])
+      book_genre.book_id IN ($1:csv)
+  `;
+  return db.many(sql, [bookId]);
 }
 
 const getAuthorsByBookId = function(bookId){
     const sql = `
     SELECT
-      DISTINCT(authors.*)
+      authors.*,
+      book_author.book_id
     FROM 
       authors
     JOIN
       book_author
     ON
-      book_author.author_id=authors.id
+      authors.id = book_author.author_id
     WHERE
-      book_author.book_id=$1;
-  `
+      book_author.book_id IN ($1:csv)
+  `;
   return db.any(sql, [bookId])
 }
 
 
 ///////////////////////////// SEARCH
 const searchForBooks = function(options){
-
-
-
-
-  console.log(options)
   const variables = []
   let sql = `
     SELECT 
@@ -77,48 +74,6 @@ const searchForBooks = function(options){
   console.log('----->', sql, variables)
   return db.any(sql, variables)
 }
-
-
-const searchForBook = searchTerm => {
-  const sql = `
-    SELECT
-      DISTINCT(books.*)
-    FROM 
-      books
-    JOIN 
-      book_author
-    ON 
-      authors.id=book_author.author_id
-    JOIN 
-      books
-    ON 
-      book_author.book_id=books.id
-    WHERE 
-      authors.author LIKE '$1%';
-  `
-  return db.any(sql, [searchTerm])
-}
-
-const searchForAuthor = searchTerm => {
-  const sql = `
-    SELECT
-      DISTINCT(authors.*)
-    FROM 
-      authors
-    JOIN 
-      book_author
-    ON 
-      books.id=book_author.book_id
-    JOIN 
-      authors
-    ON 
-      book_author.author_id=authors.id
-    WHERE 
-      authors.author LIKE '$1%';
-  `
-  return db.any(sql, [searchTerm])
-}
-
 
 
 ///////////////////////////// CREATE AND ASSOCIATE
@@ -203,10 +158,28 @@ const getBookAndAuthorsAndGenresByBookId = function(bookId){
     var book = data[0]
     book.authors=data[2]
     book.genres=data[1]
-    console.log(book)
     return book
   }) 
 }
+
+const getAllBooksWithAuthorsAndGenres = function(){
+  return getAllBooks().then(function(books){
+    const bookIds = books.map(book => book.id)
+
+    return Promise.all([
+      getGenresByBookId(bookIds),
+      getAuthorsByBookId(bookIds),
+    ]).then(function(data){
+      const genres = data[0]
+      const authors = data[1]
+      books.forEach(function(book){
+        book.authors = authors.filter(author => author.book_id === book.id)
+        book.genres = genres.filter(genre => genre.book_id === book.id)
+      })
+      return books
+    })
+  })
+}  
 
 module.exports = {
   pgp: pgp,
@@ -218,4 +191,5 @@ module.exports = {
   createAuthor:createAuthor,
   searchForBooks:searchForBooks,
   getBookAndAuthorsAndGenresByBookId:getBookAndAuthorsAndGenresByBookId,
+  getAllBooksWithAuthorsAndGenres: getAllBooksWithAuthorsAndGenres,
 }

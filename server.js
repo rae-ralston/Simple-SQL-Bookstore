@@ -14,12 +14,11 @@ app.get('/', (req,res) => {
 })
 
 app.get('/books', (req,res) => {
-  database.searchForBooks(req.query)
-    .then(function(books){
+  database.getAllBooksWithAuthorsAndGenres()
+    .then(function(data){
+
       res.render('books/index', {
-        books: books
-        // genres: genres,
-        // authors: authors
+        books: data
       })
     })
     .catch(function(error){
@@ -52,7 +51,6 @@ app.get('/books/:book_id', (req,res) => {
 });
 
 app.post('/books', (req,res) =>{
-  console.log(req.body)
   database.createBook(req.body.book)
     .catch(function(error){
       renderError(res, error)
