@@ -32,7 +32,7 @@ const getGenresByBookId = function(bookId){
 }
 
 const getAuthorsByBookId = function(bookId){
-    const sql = `
+  const sql = `
     SELECT
       authors.*,
       book_author.book_id
@@ -73,8 +73,52 @@ const searchForBooks = function(options){
   }
   console.log('----->', sql, variables)
   return db.any(sql, variables)
+    .then(books => {
+      return Promise.all([
+        getGenresForBooks(books),
+        getAuthorsForBooks(books)
+      ])
+      .then(results => {
+        const genres = results[0]
+        const authors = results[1]
+        console.log('books', books)
+        console.log('genres', genres)
+        console.log('authors', authors)
+
+        books.forEach(book => {
+          book.authors = authors.filter(author =>
+            author.book_id === book.id
+          )
+        })
+
+        return books
+      })
+    })
 }
 
+const getGenresForBooks = function(books){
+  return Promise.resolve([])
+}
+
+const getAuthorsForBooks = function(books){
+  const bookIds = books.map(book => book.id)
+  const sql = `
+    SELECT 
+      authors.*,
+      book_author.book_id
+    FROM 
+      authors
+    JOIN 
+      book_author
+    ON 
+      authors.id=book_author.author_id
+    WHERE
+      book_author.book_id IN ($1:csv)
+  `
+  console.log('bookIds ---> ', typeof bookIds)
+  console.log('bookIds? --> ', typeof [1,2])
+  return db.any(sql, [bookIds])
+}
 
 ///////////////////////////// CREATE AND ASSOCIATE
 
@@ -192,4 +236,6 @@ module.exports = {
   searchForBooks:searchForBooks,
   getBookAndAuthorsAndGenresByBookId:getBookAndAuthorsAndGenresByBookId,
   getAllBooksWithAuthorsAndGenres: getAllBooksWithAuthorsAndGenres,
+  getGenresForBooks: getGenresForBooks,
+  getAuthorsByBookId: getAuthorsByBookId,
 }

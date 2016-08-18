@@ -10,15 +10,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.get('/', (req,res) => {
-  res.render('index')
+  database.getAllGenres()
+    .then(function(genres){
+      res.render('index')
+    })
+    .catch(function(error){
+      throw error
+    })
 })
 
 app.get('/books', (req,res) => {
-  database.getAllBooksWithAuthorsAndGenres()
-    .then(function(data){
-
+  database.searchForBooks(req.query)
+    .then(function(books){
       res.render('books/index', {
-        books: data
+        books: books
       })
     })
     .catch(function(error){
@@ -51,6 +56,7 @@ app.get('/books/:book_id', (req,res) => {
 });
 
 app.post('/books', (req,res) =>{
+  console.log(req.body)
   database.createBook(req.body.book)
     .catch(function(error){
       renderError(res, error)
@@ -59,6 +65,13 @@ app.post('/books', (req,res) =>{
       res.redirect('/books/'+bookId)
     })
 
+})
+
+app.get('/test', function(req, res){
+  database.getAllBooksWithAuthorsAndGenres()
+    .then(function(data){
+      res.json(data)
+    })
 })
 
 const renderError = function(res, error){

@@ -1,10 +1,10 @@
 h1, h2, h3, h4, h5, h6{
-  color: #222;
+  color: #333;
   font-family: 'Play', sans-serif;
   text-decoration: none;
 }
 
-p, li, thead, tbody {
+p, li, tbody {
     font-family: 'Abel', sans-serif;
 }
 
@@ -13,14 +13,16 @@ p, li, thead, tbody {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #333;
+    background-color: #e0a618;
+
 }
 
 .nav li {
     float: left;
+    font-size: 1.2em;
 }
 
-li a {
+.nav li a {
     display: block;
     color: white;
     text-align: center;
@@ -28,9 +30,15 @@ li a {
     text-decoration: none;
 }
 
+.smSearchtxt {
+    font-family: 'Abel', sans-serif;
+    font-size:1em;
+}
+
 /* Change the link color to #111 (black) on hover */
-li a:hover {
-    background-color: #111;
+.nav li a:hover {
+    background-color: #e6b746;
+    color: white;
 }
 
 .active {
@@ -38,7 +46,7 @@ li a:hover {
 }
 
 .spaceGiver{
-  padding: 1em;
+  padding: 2em;
 }
 
 /* on the individual book page */

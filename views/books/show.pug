@@ -6,9 +6,8 @@ block content
   div.bookDesc
     h1=book.title
     ul
-      for author in book.authors
-        h3 
-          li=author.author
+      for author in book.authors 
+        li=author.author
     ul
       for genre in book.genres
         li=genre.genre

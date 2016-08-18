@@ -295,6 +295,13 @@ JOIN books
 ON book_author.book_id=books.id
 WHERE books.title='Good Omens';
 
+--to get all authors for books 3,4,5
+SELECT authors.*
+FROM authors
+JOIN book_author
+ON authors.id=book_author.author_id
+WHERE book_author.book_id IN (3,4,5);
+
 -- get book.title by pattern: First letter of last name (p)
 -- https://www.postgresql.org/docs/8.3/static/functions-matching.html
 SELECT DISTINCT(books.*)
