@@ -20,15 +20,20 @@ app.get('/', (req,res) => {
 })
 
 app.get('/books', (req,res) => {
-  database.searchForBooks(req.query)
+  let page = parseInt(req.query.page, 10);
+  if (isNaN(page)) page = 1;
+
+  database.getAllBooks(page)
+    .catch(function(error){
+      res.render('error',{error:error})
+    })
     .then(function(books){
       res.render('books/index', {
+        page: page,
         books: books
       })
     })
-    .catch(function(error){
-      throw error
-    })
+
 });
 
 app.get('/books/new', (req,res) => {
@@ -61,7 +66,7 @@ app.post('/books', (req,res) =>{
     .catch(function(error){
       renderError(res, error)
     })
-    .then(function(bookId){   
+    .then(function(bookId){
       res.redirect('/books/'+bookId)
     })
 
