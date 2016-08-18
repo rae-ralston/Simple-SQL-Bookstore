@@ -2,12 +2,14 @@ var pgp = require('pg-promise')();
 var connectionString = `postgres://${process.env.USER}@localhost:5432/bookstore`
 var db = pgp(connectionString)
 
-const getAllBooks = function(){
-  return db.any("select * from books")  
+const getAllBooks = function(page){
+  const offset = (page-1) * 10;
+  console.log("select * from books LIMIT 10 OFFSET "+offset)
+  return db.any("select * from books LIMIT 10 OFFSET $1", [offset])
 }
 
 const getAllGenres = function(){
-  return db.any("select * from genres")  
+  return db.any("select * from genres")
 }
 
 const getBookById = function(bookId){
@@ -19,7 +21,7 @@ const getGenresByBookId = function(bookId){
     SELECT
       genres.*,
       book_genre.book_id
-    FROM 
+    FROM
       genres
     JOIN
       book_genre
@@ -36,7 +38,7 @@ const getAuthorsByBookId = function(bookId){
     SELECT
       authors.*,
       book_author.book_id
-    FROM 
+    FROM
       authors
     JOIN
       book_author
@@ -53,7 +55,7 @@ const getAuthorsByBookId = function(bookId){
 const searchForBooks = function(options){
   const variables = []
   let sql = `
-    SELECT 
+    SELECT
       DISTINCT(books.*)
     FROM
       books
@@ -64,7 +66,7 @@ const searchForBooks = function(options){
       .replace(/^ */, '%')
       .replace(/ *$/, '%')
       .replace(/ +/g, '%')
-    
+
     variables.push(search_query)
     sql += `
         WHERE
@@ -119,14 +121,14 @@ const getGenresForBooks = function(books){
 const getAuthorsForBooks = function(books){
   const bookIds = books.map(book => book.id)
   const sql = `
-    SELECT 
+    SELECT
       authors.*,
       book_author.book_id
-    FROM 
+    FROM
       authors
-    JOIN 
+    JOIN
       book_author
-    ON 
+    ON
       authors.id=book_author.author_id
     WHERE
       book_author.book_id IN ($1:csv)
@@ -166,7 +168,7 @@ const associateAuthorsWithBook = function(authorIds, bookId){
 
 const associateGenresWithBook = function(genreIds, bookId){
   genreIds = Array.isArray(genreIds) ? genreIds : [genreIds]
-  let queries = genreIds.map(genreId => { 
+  let queries = genreIds.map(genreId => {
     let sql = `
       INSERT INTO
         book_genre (book_id, genre_id)
@@ -218,7 +220,7 @@ const getBookAndAuthorsAndGenresByBookId = function(bookId){
     book.authors=data[2]
     book.genres=data[1]
     return book
-  }) 
+  })
 }
 
 const getAllBooksWithAuthorsAndGenres = function(){
@@ -238,7 +240,7 @@ const getAllBooksWithAuthorsAndGenres = function(){
       return books
     })
   })
-}  
+}
 
 module.exports = {
   pgp: pgp,

@@ -6,7 +6,7 @@ block content
   h3 Available Books
   div.spaceGiver
     table
-      thead 
+      thead
         tr
           th ID
           th Title
@@ -16,10 +16,8 @@ block content
             td= book.id
             td
               a(href="/books/"+book.id)= book.title
-              //-how do we make these in alphabetical order?
-            td
-              for author in book.authors
-                span= author.author
-            //- td 
-              //- for genre in book.genres
-              //-   span= genre.genre
+
+  div
+    if page > 1
+      a(href="/books?page="+(page-1)) Prev
+    a(href="/books?page="+(page+1)) Next
