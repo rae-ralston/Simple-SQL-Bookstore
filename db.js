@@ -1,15 +1,26 @@
 "use strict";
 /* globals console, process, require, module: true */
 
+var databaseName = process.env.NODE_ENV === 'test' ? 'bookstore-test' : 'bookstore'
+var connectionString = process.env.NODE_ENV === 'production' ?
+  process.env.DATABASE_URL : 
+  `postgres://${process.env.USER}@localhost:5432/${databaseName}`;
 var pgp = require('pg-promise')();
-var connectionString = `postgres://${process.env.USER}@localhost:5432/bookstore`;
 var db = pgp(connectionString);
 
+const truncateAllTables = function(){
+  return db.none(`
+    TRUNCATE
+      books, 
+      authors, 
+      genres,
+      book_author,
+      book_genre
+  `)
+}
 
 const getAllBooks = function(page){
-  const offset = (page-1) * 10;
-  console.log("select * from books LIMIT 10 OFFSET "+offset)
-  return db.any("select * from books LIMIT 10 OFFSET $1", [offset])
+  return db.any("select * from books")
 }
 
 const getAllGenres = function(){
@@ -27,14 +38,14 @@ const getGenresByBookId = function(bookId){
       book_genre.book_id
     FROM
       genres
-    JOIN
+    LEFT JOIN
       book_genre
     ON
       genres.id = book_genre.genre_id
     WHERE
       book_genre.book_id IN ($1:csv)
   `;
-  return db.many(sql, [bookId]);
+  return db.any(sql, [bookId]);
 };
 
 const getAuthorsByBookId = function(bookId){
@@ -44,7 +55,7 @@ const getAuthorsByBookId = function(bookId){
       book_author.book_id
     FROM
       authors
-    JOIN
+    LEFT JOIN
       book_author
     ON
       authors.id = book_author.author_id
@@ -63,6 +74,22 @@ const searchForBooks = function(options){
       DISTINCT(books.*)
     FROM
       books
+    LEFT JOIN
+      book_author
+    ON
+      books.id = book_author.book_id
+    LEFT JOIN
+      authors
+    ON
+      authors.id = book_author.author_id
+    LEFT JOIN 
+      book_genre
+    ON 
+      books.id=book_genre.book_id
+    LEFT JOIN
+      genres
+    ON
+      genres.id=book_genre.genre_id
   `;
   if (options.search_query){
     let search_query = options.search_query
@@ -73,14 +100,27 @@ const searchForBooks = function(options){
     
     variables.push(search_query);
     sql += `
-        WHERE
-      LOWER(books.title) LIKE $${variables.length}
+      WHERE
+        LOWER(books.title) LIKE $${variables.length}
+      OR
+        LOWER(authors.author) LIKE $${variables.length}
+      OR
+        LOWER(genres.genre) LIKE $${variables.length}
     `;
+  }
+  if ('page' in options) {
+    const offset = (options.page-1) * 10;
+    variables.push(offset)
+    sql += `
+      LIMIT 10 
+      OFFSET $${variables.length}
+    `
   }
   console.log('---nope-->', sql, variables);
   //looks like this isn't getting past here?
   return db.any(sql, variables)
     .then(books => {
+      if (books.length === 0) return books;
       return Promise.all([
         getGenresForBooks(books),
         getAuthorsForBooks(books)
@@ -96,6 +136,9 @@ const searchForBooks = function(options){
           book.authors = authors.filter(author =>
             author.book_id === book.id
           );
+          book.genres = genres.filter(genre =>
+            genre.book_id === book.id
+          );
         });
 
         return books;
@@ -103,23 +146,23 @@ const searchForBooks = function(options){
     });
 };
 
-const getGenresForBooks = function(genres){
-  const genreIds = genres.map(genre => genre.id);
+const getGenresForBooks = function(books){
+  const bookIds = books.map(book => book.id);
   const sql = `
     SELECT 
       genres.*,
       book_genre.book_id
     FROM 
       genres
-    JOIN 
-      book_genres
+    LEFT JOIN 
+      book_genre
     ON 
       genres.id=book_genre.genre_id
     WHERE
       book_genre.book_id IN ($1:csv)
   `;
-  console.log('GenreID ---> ', typeof genreIds);
-  return db.any(sql, [genreIds]);
+  console.log('GenreID ---> ', typeof bookIds);
+  return db.any(sql, [bookIds]);
 };
 
 const getAuthorsForBooks = function(books){
@@ -130,7 +173,7 @@ const getAuthorsForBooks = function(books){
       book_author.book_id
     FROM
       authors
-    JOIN
+    LEFT JOIN
       book_author
     ON
       authors.id=book_author.author_id
@@ -171,6 +214,7 @@ const associateAuthorsWithBook = function(authorIds, bookId){
 };
 
 const associateGenresWithBook = function(genreIds, bookId){
+  if (typeof genreIds === 'undefined') return [];
   genreIds = Array.isArray(genreIds) ? genreIds : [genreIds];
   let queries = genreIds.map(genreId => { 
     let sql = `
@@ -197,9 +241,11 @@ const createBook = function(attributes){
     db.one(sql, [attributes.title]) // create the book
   ];
   // also create the authors
-  attributes.authors.forEach(author =>
-    queries.push(createAuthor(author))
-  );
+  if (attributes.authors){
+    attributes.authors.forEach(author =>
+      queries.push(createAuthor(author))
+    );
+  }
 
   return Promise.all(queries)
     .then(authorIds => {
@@ -249,6 +295,7 @@ const getAllBooksWithAuthorsAndGenres = function(){
 module.exports = {
   pgp: pgp,
   db: db,
+  truncateAllTables: truncateAllTables,
   getAllBooks: getAllBooks,
   getBookById: getBookById,
   createBook: createBook,

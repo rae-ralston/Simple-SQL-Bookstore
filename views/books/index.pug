@@ -16,8 +16,14 @@ block content
             td= book.id
             td
               a(href="/books/"+book.id)= book.title
+            td
+              for author in book.authors
+                span= author.author
+            td
+              for genre in book.genres
+                span= genre.genre
 
   div
     if page > 1
-      a(href="/books?page="+(page-1)) Prev
-    a(href="/books?page="+(page+1)) Next
+      a(href="/?page="+(page-1)) Prev
+    a(href="/?page="+(page+1)) Next

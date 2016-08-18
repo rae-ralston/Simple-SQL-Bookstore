@@ -8,27 +8,27 @@ var app = express();
 
 app.set('view engine', 'pug');
 
+app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/', (req,res) => {
-  database.getAllGenres()
-    .then(function(genres){
-      res.render('index');
-    })
-    .catch(function(error){
-      throw error;
-    });
-});
 
-app.get('/books', (req,res) => {
+const renderError = function(res){
+  return function(error){
+    res.render('error',{error:error})
+    throw error
+  }
+}
+
+app.get('/', (req,res) => {
   let page = parseInt(req.query.page, 10);
   if (isNaN(page)) page = 1;
-
-  database.getAllBooks(page)
-    .catch(function(error){
-      res.render('error',{error:error})
-    })
+  let searchOptions = {
+    page: page,
+    search_query:req.query.search_query,
+  }
+  database.searchForBooks(searchOptions)
+    .catch(renderError(res))
     .then(function(books){
       res.render('books/index', {
         page: page,
@@ -39,14 +39,13 @@ app.get('/books', (req,res) => {
 
 app.get('/books/new', (req,res) => {
   database.getAllGenres()
+    .catch(renderError(res))
     .then(function(genres){
       res.render('books/new', {
         genres: genres
       });
     })
-    .catch(function(error){
-      throw error;
-    });
+    .catch(renderError(res))
 });
 
 app.get('/books/:book_id', (req,res) => {
@@ -56,34 +55,25 @@ app.get('/books/:book_id', (req,res) => {
         book: book
       });
     })
-    .catch(function(error){
-      throw error;
-    });
+    .catch(renderError(res))
 });
 
 app.post('/books', (req,res) =>{
   console.log(req.body);
   database.createBook(req.body.book)
-    .catch(function(error){
-      renderError(res, error);
-    })
-
     .then(function(bookId){   
       res.redirect('/books/'+bookId);
-    });
+    })
+    .catch(renderError(res))
 });
 
 app.get('/test', function(req, res){
   database.getAllBooksWithAuthorsAndGenres()
     .then(function(data){
       res.json(data);
-    });
+    })
+    .catch(renderError(res))
 });
-
-const renderError = function(res, error){
-  res.status(500).render('error', {error: error});
-  throw error;
-};
 
 
 var port = Number( process.env.PORT || 5000 );
