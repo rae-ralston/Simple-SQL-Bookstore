@@ -71,7 +71,8 @@ const searchForBooks = function(options){
       LOWER(books.title) LIKE $${variables.length}
     `
   }
-  console.log('----->', sql, variables)
+  console.log('---nope-->', sql, variables)
+  //looks like this isn't getting past here?
   return db.any(sql, variables)
     .then(books => {
       return Promise.all([
@@ -97,7 +98,22 @@ const searchForBooks = function(options){
 }
 
 const getGenresForBooks = function(books){
-  return Promise.resolve([])
+  const genreIds = genres.map(genre => genre.id)
+  const sql = `
+    SELECT 
+      genres.*,
+      book_genre.book_id
+    FROM 
+      genres
+    JOIN 
+      book_genres
+    ON 
+      genres.id=book_genre.genre_id
+    WHERE
+      book_genre.book_id IN ($1:csv)
+  `
+  console.log('GenreID ---> ', typeof genreIds)
+  return db.any(sql, [genreIds])
 }
 
 const getAuthorsForBooks = function(books){
@@ -116,7 +132,6 @@ const getAuthorsForBooks = function(books){
       book_author.book_id IN ($1:csv)
   `
   console.log('bookIds ---> ', typeof bookIds)
-  console.log('bookIds? --> ', typeof [1,2])
   return db.any(sql, [bookIds])
 }
 

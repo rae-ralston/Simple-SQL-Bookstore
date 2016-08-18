@@ -5,22 +5,20 @@
   "main": "index.js",
   "dependencies": {
     "body-parser": "^1.15.2",
+    "expect": "^1.20.2",
     "express": "^4.14.0",
+    "mocha": "^3.0.2",
     "pg-promise": "^5.3.1",
-    "pug": "^2.0.0-beta5",
-    "pug-bootstrap": "0.0.1"
+    "pug": "^2.0.0-beta5"
   },
   "devDependencies": {
-    "jasmine": "^2.4.1",
-    "jasmine-node": "^1.14.5",
-    "jasmine-spec-reporter": "^2.5.0",
     "jshint": "^2.9.2"
   },
   "scripts": {
-    "test": "babel-watch spec/run.js",
+    "test": "./node_modules/mocha/bin/mocha",
     "dev": "nodemon dist/index.js",
     "start": "node dist/index.js",
-    "buildwatch": "babel src -d dist -w --copy-files"
+    "lint": "jshint db.js"
   },
   "repository": {
     "type": "git",

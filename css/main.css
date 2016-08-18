@@ -47,10 +47,17 @@ p, li, tbody {
 
 .spaceGiver{
   padding: 2em;
+  display: flex;
 }
 
 /* on the individual book page */
 .bookDesc ul li{
     text-decoration: none;
     display: block;
+}
+
+.individualBookWrapper{
+    padding-top: 0;
+    padding-left:2em;
+    display: flex;
 }

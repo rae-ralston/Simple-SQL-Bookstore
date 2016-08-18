@@ -12,29 +12,23 @@ Creating this web application will provide exposure to:
 
 ## Specifications
 
-- [ ] Any user can add books into the system via an admin page
+- [X] Any user can add books into the system via an admin page (100% Complete)
 - [ ] Books entered in the system are listed on the home page, in pages of 10
 - [ ] Users can search for books by title OR by author OR by genre, and search results will be presented in a new page
 - [ ] Users can view book details on a book detail page, linked to from the listing or search pages
-- [ ] All code submissions are peer reviewed via GitHub PR by the team, and master is always in a stable state (tests passed & site functions)
+- [X] All code submissions are peer reviewed via GitHub PR by the team, and master is always in a stable state (tests passed & site functions)
 
-
-How do you query in a column for a 'fuzzy' search
-join tables
-sql schema design
-how to write jasmine tests for database schemas
-how to write jasmine tests
 
 ### Required
 
-- [ ] The artifact produced is properly licensed, preferably with the [MIT license][mit-license].
+- [X] The artifact produced is properly licensed, preferably with the [MIT license][mit-license].
 
 ## Quality Rubric
 
 ## Code Quality Specs
 
 - [ ] No js hint errors
-- [ ] Variables, functions, css classes, etc. are meaningfully named.
+- [X] Variables, functions, css classes, etc. are meaningfully named.
 - [ ] Functions are small and serve a single purpose
 - [ ] Code is well organized into a meaningful file structure
 - [ ] Code is reasonably tested with a test suite

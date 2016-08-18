@@ -1,4 +1,4 @@
--- CREATE TABLES
+sc-- CREATE TABLES
 
 --psql bookstore < scratch.sql
 
