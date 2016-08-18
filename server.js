@@ -1,3 +1,5 @@
+"use strict";
+/* globals console, process, require: true */
 var express = require('express');
 var database = require('./db');
 var bodyParser = require('body-parser');
@@ -12,23 +14,23 @@ app.use(bodyParser.json());
 app.get('/', (req,res) => {
   database.getAllGenres()
     .then(function(genres){
-      res.render('index')
+      res.render('index');
     })
     .catch(function(error){
-      throw error
-    })
-})
+      throw error;
+    });
+});
 
 app.get('/books', (req,res) => {
   database.searchForBooks(req.query)
     .then(function(books){
       res.render('books/index', {
         books: books
-      })
+      });
     })
     .catch(function(error){
-      throw error
-    })
+      throw error;
+    });
 });
 
 app.get('/books/new', (req,res) => {
@@ -36,11 +38,11 @@ app.get('/books/new', (req,res) => {
     .then(function(genres){
       res.render('books/new', {
         genres: genres
-      })
+      });
     })
     .catch(function(error){
-      throw error
-    })
+      throw error;
+    });
 });
 
 app.get('/books/:book_id', (req,res) => {
@@ -48,40 +50,39 @@ app.get('/books/:book_id', (req,res) => {
    .then(function(book){
       res.render('books/show', {
         book: book
-      })
+      });
     })
     .catch(function(error){
-      throw error
-    })
+      throw error;
+    });
 });
 
 app.post('/books', (req,res) =>{
-  console.log(req.body)
+  console.log(req.body);
   database.createBook(req.body.book)
     .catch(function(error){
-      renderError(res, error)
+      renderError(res, error);
     })
     .then(function(bookId){   
-      res.redirect('/books/'+bookId)
-    })
-
-})
+      res.redirect('/books/'+bookId);
+    });
+});
 
 app.get('/test', function(req, res){
   database.getAllBooksWithAuthorsAndGenres()
     .then(function(data){
-      res.json(data)
-    })
-})
+      res.json(data);
+    });
+});
 
 const renderError = function(res, error){
-  res.status(500).render('error', {error: error})
-  throw error
-}
+  res.status(500).render('error', {error: error});
+  throw error;
+};
 
 
 var port = Number( process.env.PORT || 5000 );
 
 app.listen(port, function() {
-  console.log('http://localhost:' + port)
-})
+  console.log('http://localhost:' + port);
+});

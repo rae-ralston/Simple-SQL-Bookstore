@@ -1,18 +1,21 @@
+"use strict";
+/* globals console, process, require, module: true */
+
 var pgp = require('pg-promise')();
-var connectionString = `postgres://${process.env.USER}@localhost:5432/bookstore`
-var db = pgp(connectionString)
+var connectionString = `postgres://${process.env.USER}@localhost:5432/bookstore`;
+var db = pgp(connectionString);
 
 const getAllBooks = function(){
-  return db.any("select * from books")  
-}
+  return db.any("select * from books");
+};
 
 const getAllGenres = function(){
-  return db.any("select * from genres")  
-}
+  return db.any("select * from genres");
+};
 
 const getBookById = function(bookId){
-  return db.one("select * from books where books.id=$1", [bookId])
-}
+  return db.one("select * from books where books.id=$1", [bookId]);
+};
 
 const getGenresByBookId = function(bookId){
   const sql =  `
@@ -29,7 +32,7 @@ const getGenresByBookId = function(bookId){
       book_genre.book_id IN ($1:csv)
   `;
   return db.many(sql, [bookId]);
-}
+};
 
 const getAuthorsByBookId = function(bookId){
   const sql = `
@@ -45,33 +48,33 @@ const getAuthorsByBookId = function(bookId){
     WHERE
       book_author.book_id IN ($1:csv)
   `;
-  return db.any(sql, [bookId])
-}
+  return db.any(sql, [bookId]);
+};
 
 
 ///////////////////////////// SEARCH
 const searchForBooks = function(options){
-  const variables = []
+  const variables = [];
   let sql = `
     SELECT 
       DISTINCT(books.*)
     FROM
       books
-  `
+  `;
   if (options.search_query){
     let search_query = options.search_query
       .toLowerCase()
       .replace(/^ */, '%')
       .replace(/ *$/, '%')
-      .replace(/ +/g, '%')
+      .replace(/ +/g, '%');
     
-    variables.push(search_query)
+    variables.push(search_query);
     sql += `
         WHERE
       LOWER(books.title) LIKE $${variables.length}
-    `
+    `;
   }
-  console.log('---nope-->', sql, variables)
+  console.log('---nope-->', sql, variables);
   //looks like this isn't getting past here?
   return db.any(sql, variables)
     .then(books => {
@@ -80,25 +83,25 @@ const searchForBooks = function(options){
         getAuthorsForBooks(books)
       ])
       .then(results => {
-        const genres = results[0]
-        const authors = results[1]
-        console.log('books', books)
-        console.log('genres', genres)
-        console.log('authors', authors)
+        const genres = results[0];
+        const authors = results[1];
+        console.log('books', books);
+        console.log('genres', genres);
+        console.log('authors', authors);
 
         books.forEach(book => {
           book.authors = authors.filter(author =>
             author.book_id === book.id
-          )
-        })
+          );
+        });
 
-        return books
-      })
-    })
-}
+        return books;
+      });
+    });
+};
 
-const getGenresForBooks = function(books){
-  const genreIds = genres.map(genre => genre.id)
+const getGenresForBooks = function(genres){
+  const genreIds = genres.map(genre => genre.id);
   const sql = `
     SELECT 
       genres.*,
@@ -111,13 +114,13 @@ const getGenresForBooks = function(books){
       genres.id=book_genre.genre_id
     WHERE
       book_genre.book_id IN ($1:csv)
-  `
-  console.log('GenreID ---> ', typeof genreIds)
-  return db.any(sql, [genreIds])
-}
+  `;
+  console.log('GenreID ---> ', typeof genreIds);
+  return db.any(sql, [genreIds]);
+};
 
 const getAuthorsForBooks = function(books){
-  const bookIds = books.map(book => book.id)
+  const bookIds = books.map(book => book.id);
   const sql = `
     SELECT 
       authors.*,
@@ -130,15 +133,15 @@ const getAuthorsForBooks = function(books){
       authors.id=book_author.author_id
     WHERE
       book_author.book_id IN ($1:csv)
-  `
-  console.log('bookIds ---> ', typeof bookIds)
-  return db.any(sql, [bookIds])
-}
+  `;
+  console.log('bookIds ---> ', typeof bookIds);
+  return db.any(sql, [bookIds]);
+};
 
 ///////////////////////////// CREATE AND ASSOCIATE
 
 const createAuthor = function(attributes){
-  console.log(attributes)
+  console.log(attributes);
   const sql = `
     INSERT INTO
       authors (author)
@@ -146,37 +149,37 @@ const createAuthor = function(attributes){
       ($1)
     RETURNING
       id
-  `
-  return db.one(sql, [attributes.author])
-}
+  `;
+  return db.one(sql, [attributes.author]);
+};
 
 const associateAuthorsWithBook = function(authorIds, bookId){
-  authorIds = Array.isArray(authorIds) ? authorIds : [authorIds]
+  authorIds = Array.isArray(authorIds) ? authorIds : [authorIds];
   let queries = authorIds.map(authorId => {
     const sql = `
       INSERT INTO
         book_author (book_id, author_id)
       VALUES
         ($1, $2)
-    `
-    return db.none(sql, [bookId, authorId])
-  })
-  return Promise.all(queries)
-}
+    `;
+    return db.none(sql, [bookId, authorId]);
+  });
+  return Promise.all(queries);
+};
 
 const associateGenresWithBook = function(genreIds, bookId){
-  genreIds = Array.isArray(genreIds) ? genreIds : [genreIds]
+  genreIds = Array.isArray(genreIds) ? genreIds : [genreIds];
   let queries = genreIds.map(genreId => { 
     let sql = `
       INSERT INTO
         book_genre (book_id, genre_id)
       VALUES
         ($1, $2)
-    `
-    return db.none(sql, [bookId, genreId])
-  })
-  return Promise.all(queries)
-}
+    `;
+    return db.none(sql, [bookId, genreId]);
+  });
+  return Promise.all(queries);
+};
 
 const createBook = function(attributes){
   const sql = `
@@ -186,27 +189,27 @@ const createBook = function(attributes){
       ($1)
     RETURNING
       id
-  `
+  `;
   var queries = [
     db.one(sql, [attributes.title]) // create the book
-  ]
+  ];
   // also create the authors
   attributes.authors.forEach(author =>
     queries.push(createAuthor(author))
-  )
+  );
 
   return Promise.all(queries)
     .then(authorIds => {
-      authorIds = authorIds.map(x => x.id)
-      const bookId = authorIds.shift()
+      authorIds = authorIds.map(x => x.id);
+      const bookId = authorIds.shift();
       return Promise.all([
         associateAuthorsWithBook(authorIds, bookId),
         associateGenresWithBook(attributes.genres, bookId),
       ]).then(function(){
         return bookId;
-      })
-    })
-}
+      });
+    });
+};
 
 const getBookAndAuthorsAndGenresByBookId = function(bookId){
   return Promise.all([
@@ -214,31 +217,31 @@ const getBookAndAuthorsAndGenresByBookId = function(bookId){
     getGenresByBookId(bookId),
     getAuthorsByBookId(bookId),
   ]).then(function(data){
-    var book = data[0]
-    book.authors=data[2]
-    book.genres=data[1]
-    return book
-  }) 
-}
+    var book = data[0];
+    book.authors=data[2];
+    book.genres=data[1];
+    return book;
+  });
+};
 
 const getAllBooksWithAuthorsAndGenres = function(){
   return getAllBooks().then(function(books){
-    const bookIds = books.map(book => book.id)
+    const bookIds = books.map(book => book.id);
 
     return Promise.all([
       getGenresByBookId(bookIds),
       getAuthorsByBookId(bookIds),
     ]).then(function(data){
-      const genres = data[0]
-      const authors = data[1]
+      const genres = data[0];
+      const authors = data[1];
       books.forEach(function(book){
-        book.authors = authors.filter(author => author.book_id === book.id)
-        book.genres = genres.filter(genre => genre.book_id === book.id)
-      })
-      return books
-    })
-  })
-}  
+        book.authors = authors.filter(author => author.book_id === book.id);
+        book.genres = genres.filter(genre => genre.book_id === book.id);
+      });
+      return books;
+    });
+  });
+};
 
 module.exports = {
   pgp: pgp,
@@ -253,4 +256,4 @@ module.exports = {
   getAllBooksWithAuthorsAndGenres: getAllBooksWithAuthorsAndGenres,
   getGenresForBooks: getGenresForBooks,
   getAuthorsByBookId: getAuthorsByBookId,
-}
+};
