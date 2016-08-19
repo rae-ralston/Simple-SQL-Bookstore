@@ -1,4 +1,4 @@
-sc-- CREATE TABLES
+-- CREATE TABLES
 
 --psql bookstore < scratch.sql
 
@@ -50,7 +50,12 @@ VALUES
   ('The Subtle Knife'),
   ('Dune'),
   ('A Scanner Darkly'),
-  ('Good Omens');
+  ('Good Omens'),
+  ('Neuromancer'), 
+  ('1984'),
+  ('Hyperion'),
+  ('Fahrenheit 451'),
+  ('The Left Hand of Darkness');
 
 INSERT INTO 
   genres (genre)
@@ -59,7 +64,13 @@ VALUES
   ('Sci Fi'),
   ('Romance'),
   ('Comedy'),
-  ('Fantasy');
+  ('Fantasy'),
+  ('Space'),
+  ('Aliens'),
+  ('Strong Female Lead'),
+  ('Dystopia'),
+  ('Female Author'),
+  ('Classic');
 
 INSERT INTO 
   authors (author)
@@ -69,9 +80,14 @@ VALUES
   ('Jacqueline Carey'),
   ('Philip Pullman'),
   ('Orson Scott Card'),
-  ('Philip Dick'),
+  ('Philip K Dick'),
   ('Terry Prachett'),
-  ('Neil Gaiman');
+  ('Neil Gaiman'), 
+  ('William Gibson'),
+  ('George Orwell'),
+  ('Dan Simmons'),
+  ('Ray Bradbury'),
+  ('Ursula K Le Guin');
 
 
 -- CONNECT DATA TO EACH OTHER THROUGH JOIN TABLES
@@ -79,6 +95,65 @@ VALUES
 
 
 --------------------join genres and books
+--  ('1984'), is classic, 
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='1984'
+AND genres.genre='Classic';
+
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='1984'
+AND genres.genre='Classic';
+
+--('Hyperion'),
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='Hyperion'
+AND genres.genre='Aliens';
+
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='Hyperion'
+AND genres.genre='Sci Fi';
+
+--('Fahrenheit 451'),
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='Fahrenheit 451'
+AND genres.genre='Dystopia';
+
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='Fahrenheit 451'
+AND genres.genre='Young Adult';
+
+--('The Left Hand of Darkness')
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='The Left Hand of Darkness'
+AND genres.genre='Female Author';
+
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='The Left Hand of Darkness'
+AND genres.genre='Classic';
 
 ---White fang is a YA book
 INSERT INTO book_genre
@@ -129,6 +204,13 @@ CROSS JOIN genres
 WHERE books.title='Kushiel''s Dart'
 AND genres.genre='Romance';
 
+INSERT INTO book_genre
+SELECT books.id, genres.id
+FROM books
+CROSS JOIN genres
+WHERE books.title='Kushiel''s Dart'
+AND genres.genre='Strong Female Lead';
+
 -- dune is a scifi novel
 INSERT INTO book_genre
 SELECT books.id, genres.id
@@ -144,7 +226,6 @@ FROM books
 CROSS JOIN genres
 WHERE books.title='Kushiel''s Dart'
 AND genres.genre='Fantasy';
-
 
 INSERT INTO book_genre
 SELECT books.id, genres.id
@@ -170,6 +251,42 @@ AND genres.genre='Fantasy';
 
 
 --------------------join books and authors
+--('Neuromancer'), William Gibson
+INSERT INTO book_author
+SELECT books.id, authors.id
+FROM books
+CROSS JOIN authors
+WHERE books.title='Neuromancer'
+AND authors.author='William Gibson';
+
+--('1984'),
+INSERT INTO book_author
+SELECT books.id, authors.id
+FROM books
+CROSS JOIN authors
+WHERE books.title='1984'
+AND authors.author='George Orwell';
+
+INSERT INTO book_author
+SELECT books.id, authors.id
+FROM books
+CROSS JOIN authors
+WHERE books.title='Hyperion'
+AND authors.author='Dan Simmons';
+
+INSERT INTO book_author
+SELECT books.id, authors.id
+FROM books
+CROSS JOIN authors
+WHERE books.title='Fahrenheit 451'
+AND authors.author='Ray Bradbury';
+
+INSERT INTO book_author
+SELECT books.id, authors.id
+FROM books
+CROSS JOIN authors
+WHERE books.title='The Left Hand of Darkness'
+AND authors.author='Ursula K Le Guin';
 
 --kushie's dart written jacqueline carey
 INSERT INTO book_author
@@ -185,7 +302,7 @@ SELECT books.id, authors.id
 FROM books
 CROSS JOIN authors
 WHERE books.title='Good Omens'
-AND authors.author='Terry Carey';
+AND authors.author='Terry Prachett';
 
 --Good Omens was written by Terry Prachett
 INSERT INTO book_author
@@ -244,83 +361,4 @@ FROM books
 CROSS JOIN authors
 WHERE books.title='A Scanner Darkly'
 AND authors.author='Philip K Dick';
-
-
-
-----------------------SEARCHING LIKE CRAZY
-
---all books with Genra YA
-SELECT books.* 
-FROM books
-JOIN book_genre
-ON books.id=book_genre.book_id
-JOIN genres
-ON book_genre.genre_id=genres.id
-WHERE genres.genre='Young Adult';
-
-
---all white fang's genre
-SELECT genres.genre
-FROM genres
-JOIN book_genre
-ON book_genre.genre_id=genres.id
-JOIN books
-ON books.id=book_genre.book_id
-WHERE books.title='White Fang';
-
--- give me all the genres for book "X"
-SELECT DISTINCT(genres.*)
-FROM genres
-JOIN book_genre
-ON genres.id=book_genre.genre_id
-JOIN books
-ON book_genre.book_id=books.id
-WHERE books.title='Kushiel''s Dart';
-
--- get book.title by author_id
-SELECT DISTINCT(books.*)
-FROM books
-JOIN book_author
-ON books.id=book_author.book_id
-JOIN authors
-ON book_author.author_id=authors.id
-WHERE authors.author='Philip Pullman';
-
--- get author name by book title
-SELECT DISTINCT(authors.*)
-FROM authors
-JOIN book_author
-ON authors.id=book_author.author_id
-JOIN books
-ON book_author.book_id=books.id
-WHERE books.title='Good Omens';
-
---to get all authors for books 3,4,5
-SELECT authors.*
-FROM authors
-JOIN book_author
-ON authors.id=book_author.author_id
-WHERE book_author.book_id IN (3,4,5);
-
--- get book.title by pattern: First letter of last name (p)
--- https://www.postgresql.org/docs/8.3/static/functions-matching.html
-SELECT DISTINCT(books.*)
-FROM books 
-JOIN book_author
-ON books.id=book_author.book_id
-JOIN authors
-ON book_author.author_id=authors.id
-WHERE authors.author LIKE 'P%';
-
--- get book.title by pattern: Part of a last name? Pull for pullman
-SELECT DISTINCT(books.*)
-FROM books
-JOIN book_author
-ON books.id=book_author.book_id
-JOIN authors
-ON book_author.author_id=authors.id
-WHERE authors.author LIKE 'Nei%';
-
-
--- give me all the books with at least one of N genres
 

@@ -1,29 +1,31 @@
 extends ../layout.pug
 
 block title
-  title All of our Books!
+  title The Singing Siren Bookstore | Your wildest dreams come true.
 block content
-  h3 Available Books
-  div.spaceGiver
-    table
-      thead
-        tr
-          th ID
-          th Title
-      tbody
-        for book in books
-          tr
-            td= book.id
-            td
-              a(href="/books/"+book.id)= book.title
-            td
-              for author in book.authors
-                span= author.author
-            td
-              for genre in book.genres
-                span= genre.genre
-
-  div
-    if page > 1
-      a(href="/?page="+(page-1)) Prev
-    a(href="/?page="+(page+1)) Next
+    .spaceGiver
+      div
+        h3 Available Books
+        table.table
+          thead
+            tr
+              th ID
+              th Title
+          tbody
+            for book in books
+              tr
+                td= book.id
+                td
+                  a(href="/books/"+book.id)= book.title
+                td
+                  for author in book.authors
+                    span= author.author
+                td
+                  for genre in book.genres
+                    span= genre.genre += ', '
+        div.prevnext
+          div.prevnext
+            if page > 1
+              a(href="/?page="+(page-1)) Prev
+          div.prevnext
+            a(href="/?page="+(page+1)) Next

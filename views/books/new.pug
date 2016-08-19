@@ -5,17 +5,18 @@ block title
   
 block content
   div.spaceGiver
-    h3 add a book to the system
-    form(action="/books", method="post")
-      div
-        input(type="title", name="book[title]", placeholder="Book Title")
-      div
-        input(type="text", name="book[authors][0][author]", placeholder="First Author Name")
-      div
-        input(type="text", name="book[authors][1][author]", placeholder="Second Author Name")
-      div
-        select(name="book[genres]" multiple)
-          for genre in genres 
-            option(value=genre.id)=genre.genre
-      div
-        input(type="submit", value="Submit a book!" )
+    div
+      h3 Add a Book to Our System
+      form(action="/books", method="post")
+        div.spaceGiverForm
+          input(type="title", name="book[title]", placeholder="Book Title")
+        div.spaceGiverForm
+          input(type="text", name="book[authors][0][author]", placeholder="First Author Name")
+        div.spaceGiverForm
+          input(type="text", name="book[authors][1][author]", placeholder="Second Author Name")
+        div.spaceGiverForm
+          select(name="book[genres]" multiple)
+            for genre in genres 
+              option(value=genre.id)=genre.genre
+        div.spaceGiverForm
+          input.btn(type="submit", value="Submit a book!" )

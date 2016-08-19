@@ -35,7 +35,6 @@ p, li, tbody {
     font-size:1em;
 }
 
-/* Change the link color to #111 (black) on hover */
 .nav li a:hover {
     background-color: #e6b746;
     color: white;
@@ -46,8 +45,39 @@ p, li, tbody {
 }
 
 .spaceGiver{
-  padding: 2em;
+  padding-left: 2em;
+  padding-top:.2em;
   display: flex;
+}
+
+.spaceGiver div {
+    flex-direction: column;
+}
+
+.prevnext{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #e0a618;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.prevnext div a {
+    font-size: 1.2em;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    flex-shrink:.8em;
+    justify-content: space-between;
+}
+
+.prevnext a:hover {
+    background-color: #e6b746;
+    color: white;
 }
 
 /* on the individual book page */
@@ -60,4 +90,17 @@ p, li, tbody {
     padding-top: 0;
     padding-left:2em;
     display: flex;
+}
+
+.spaceGiverForm{
+    padding:.5em;
+}
+
+.btn{
+    background-color: #e0a618;
+    color: white;
+}
+.btn:hover{
+    background-color: #e6b746;
+    color: white;
 }
